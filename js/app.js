@@ -1,5 +1,5 @@
 'use strict';
-//Define how many products to show at once
+//Define how many products to show at once.
 const NUM_OF_PRODUCTS = 3;
 
 // Define how many rounds there are and the current round to increment for every product click
@@ -59,6 +59,9 @@ const productsArray = [
 
 const resultsButton = document.getElementById('resultsButton');
 
+// Note: when a number of products on the page is greater or equal to half the total number of products, the requirement to have no repeats between clicks can't be met. This is handled by the boolean below
+const REPEAT_TRACK = productsArray.length / 2 >= NUM_OF_PRODUCTS ? true : false;
+
 // For incrementing clicks, define a global hash table that contains the indices for each product within the products array
 const productArrayIndices = {};
 
@@ -98,8 +101,16 @@ function renderProducts() {
   for (let img of document.getElementsByClassName('productImage')) {
     let index = getRandomIndex();
 
-    while (newProductArrayIndices[index] || currentProductArrayIndices[index]) {
-      index = getRandomIndex();
+    // If the number of products to be displayed supports preventing repeats between clicks, check for repeats in the current render and in the new render
+    if (REPEAT_TRACK) {
+      while (currentProductArrayIndices[index] || newProductArrayIndices[index]) {
+        index = getRandomIndex();
+      }
+    // If the number of products to be displayed doesn't support prevent repeats between clicks, only check for repeats within the new render
+    } else {
+      while (newProductArrayIndices[index]) {
+        index = getRandomIndex();
+      }
     }
 
     let newProduct = productsArray[index];
