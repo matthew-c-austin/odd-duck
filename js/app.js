@@ -59,7 +59,7 @@ const productsArray = [
 
 const resultsButton = document.getElementById('resultsButton');
 
-// For incrementing clicks, define a global dictionary that contains the indices for each product within the products array
+// For incrementing clicks, define a global hash table that contains the indices for each product within the products array
 const productArrayIndices = {};
 
 // This function creates an index map of the products
@@ -69,6 +69,9 @@ function defineProductIndices() {
     productArrayIndices[productName] = i;
   }
 }
+
+// To ensure that there is no repeat products from the previous render, define a global hash table that is continuously updated as the renderProducts function is called
+let currentProductArrayIndices = {};
 
 // This function creates image elements to be populated with products
 function createInitialProducts() {
@@ -90,12 +93,12 @@ function createInitialProducts() {
 
 // This function renders random images on the page
 function renderProducts() {
-  // Define empty dictionary for ensuring images rendered are not duplicates
-  let productArrayIndicesUsed = {};
+  // Define empty hash map for ensuring images rendered are not duplicates
+  let newProductArrayIndices = {};
   for (let img of document.getElementsByClassName('productImage')) {
     let index = getRandomIndex();
 
-    while (productArrayIndicesUsed[index]) {
+    while (newProductArrayIndices[index] || currentProductArrayIndices[index]) {
       index = getRandomIndex();
     }
 
@@ -104,8 +107,9 @@ function renderProducts() {
     // Increment views
     newProduct.views ++;
     // Add index to the indices dictionary
-    productArrayIndicesUsed[index] = true;
+    newProductArrayIndices[index] = true;
   }
+  currentProductArrayIndices = newProductArrayIndices;
 }
 
 // This function gets a random index from the products array
