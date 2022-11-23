@@ -72,6 +72,7 @@ main {
 
 #productDisplaySection {
   display: flex;
+  flex-wrap: wrap;
   width: 100%;
   justify-content: space-evenly;
   padding: 2rem 0 2rem 0;
@@ -79,13 +80,16 @@ main {
 }
 
 #productDisplaySection img {
+  min-width: 250px;
   max-width: 25%;
   border: 0.25rem solid #c7a46e;
+  border-radius: .25rem;
   transition: 0.5s;
+  margin: 1rem;
 }
 
 #productDisplaySection img:hover {
-  scale: 1.2;
+  scale: 1.1;
 }
 
 /* Results Display
@@ -96,6 +100,7 @@ main {
   flex-direction: column;
   align-items: center;
   margin: 1rem 0 1rem 0;
+  gap: 2rem;
 }
 
 #resultsButton {
@@ -114,7 +119,8 @@ main {
   text-decoration: none;
   transition: all 250ms;
   user-select: none;
-  width: 25%;
+  min-width: fit-content;
+  max-width: 25%;
 }
 
 #resultsButton:hover {
@@ -122,6 +128,58 @@ main {
   box-shadow: rgba(0, 0, 0, 0.1) 0 4px 12px;
 } 
 
-#resultsDiplay {
-  
+#resultsDisplay {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 2rem;
+}
+
+#resultsChart:empty {
+  display: none;
+}
+
+#resultsChart {
+  border: 0.25rem solid #c7a46e;
+  background-color: #fff;
+  min-width: 600px;
+  min-height: 375px;
+  max-width: 80%;
+}
+
+#resultsList:empty {
+  display: none;
+}
+
+#resultsList {
+  border: 0.25rem solid #c7a46e;
+  background-color: #45270e;
+  direction: flex;
+  flex-direction: column;
+  width:  fit-content;
+  border-radius: .25rem;
+  padding: 1%;
+  white-space: nowrap;
+}
+
+#resultsList li {
+  color: #fff;
+  list-style: square inside;
+  padding: 1%;
+}
+
+@media (min-width: 1200px) {
+  #resultsDisplay {
+    flex-direction: row;
+    justify-content: center;
+    gap: 2rem;
+  }
+
+  #resultsChart {
+    border: 0.25rem solid #c7a46e;
+    background-color: #fff;
+    max-width: 800px;
+  }
 }

@@ -116,6 +116,49 @@ function updateImageElement(imgElement, product) {
   imgElement.title = product.name;
 }
 
+// This function creates a chart for results viewing
+function createResultsChart() {
+  Chart.defaults.font.family = '"Georgia, serif"';
+  Chart.defaults.font.size = '16';
+  Chart.defaults.color = '#000';
+  const ctx = document.getElementById('resultsChart');
+  const resultsChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: productsArray.map(row => row.name), // x-axis
+      datasets: [{
+        label: 'Number of Clicks', // title
+        data: productsArray.map(row => row.clicks), // y-axis data
+        backgroundColor: [
+          'rgba(69,39,14)'
+        ],
+        borderColor: [
+          'rgba(199,164,110)',
+        ],
+        borderWidth: 2
+      },
+      {
+        label: 'Number of Views', // title
+        data: productsArray.map(row => row.views), // y-axis data
+        backgroundColor: [
+          'rgba(102,139,97)'
+        ],
+        borderColor: [
+          'rgba(199,164,110)',
+        ],
+        borderWidth: 2
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+
 // Event handler for clicking on an image
 function handleProductClick(event) {
   round++;
@@ -123,6 +166,8 @@ function handleProductClick(event) {
   productsArray[targetIndex].clicks++;
 
   if (round === TOTAL_ROUNDS) {
+    // When total rounds have passed, visually style the view results button to indicate a change of state
+    document.getElementById('resultsButton').style.border = '0.25rem solid #c7a46e';
     for (let img of document.getElementsByClassName('productImage')) {
       img.removeEventListener('click', handleProductClick);
     }
@@ -152,9 +197,13 @@ function viewResults() {
 
   // Allow the user to view results after each click until total rounds have passed
   if (round === TOTAL_ROUNDS) {
+    // Only show the results chart after all rounds
+    createResultsChart();
     resultsButton.removeEventListener('click', viewResults);
   }
 }
+
+
 
 // On page load
 defineProductIndices();
