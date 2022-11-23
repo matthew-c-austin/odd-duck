@@ -53,8 +53,8 @@ function defineProductIndices() {
   }
 }
 
-// To ensure that there is no repeat products from the previous render, define a global hash table that is continuously updated as the renderProducts function is called
-let currentProductArrayIndices = {};
+// To ensure that there is no repeat products from the previous render, define a global array that is continuously updated as the renderProducts function is called
+let productArrayIndicesUsed = [];
 
 // This function creates image elements to be populated with products
 function createInitialProducts() {
@@ -76,31 +76,34 @@ function createInitialProducts() {
 
 // This function renders random images on the page
 function renderProducts() {
-  // Define empty hash map for ensuring images rendered are not duplicates
-  let newProductArrayIndices = {};
-  for (let img of document.getElementsByClassName('productImage')) {
-    let index = getRandomIndex();
-
-    // If the number of products to be displayed supports preventing repeats between clicks, check for repeats in the current render and in the new render
-    if (REPEAT_TRACK) {
-      while (currentProductArrayIndices[index] || newProductArrayIndices[index]) {
+  // If the number of products to be displayed supports preventing repeats between clicks, check for repeats in the current render and in the new render
+  if (REPEAT_TRACK) {
+    while (productArrayIndicesUsed.length < 2 * NUM_OF_PRODUCTS) {
+      let index = getRandomIndex();
+      while (productArrayIndicesUsed.includes(index)) {
         index = getRandomIndex();
       }
-    // If the number of products to be displayed doesn't support prevent repeats between clicks, only check for repeats within the new render
-    } else {
-      while (newProductArrayIndices[index]) {
-        index = getRandomIndex();
-      }
+      productArrayIndicesUsed.push(index);
     }
+  // If the number of products to be displayed doesn't support prevent repeats between clicks, only check for repeats within the new render
+  } else {
+    while (productArrayIndicesUsed.length < NUM_OF_PRODUCTS) {
+      let index = getRandomIndex();
+      while (productArrayIndicesUsed.includes(index)) {
+        index = getRandomIndex();
+      }
+      productArrayIndicesUsed.push(index);
+    }
+  }
 
-    let newProduct = productsArray[index];
+  for (let img of document.getElementsByClassName('productImage')) {
+    let newProduct = productsArray[productArrayIndicesUsed[0]];
     updateImageElement(img, newProduct);
     // Increment views
     newProduct.views ++;
-    // Add index to the indices dictionary
-    newProductArrayIndices[index] = true;
+    // Shift the product array indices array
+    productArrayIndicesUsed.shift();
   }
-  currentProductArrayIndices = newProductArrayIndices;
 }
 
 // This function gets a random index from the products array
