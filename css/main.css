@@ -1,0 +1,185 @@
+/* Table of Content
+==================================================
+	- Google fonts & font family -
+	- Typography -
+    - Color Palette -
+    - General -
+    - Nav Bar -
+    - Product Display -
+    - Results Display -
+    - Results List -
+    - Footer -
+*/
+
+/* Google fonts & font family
+==================================================*/
+
+/*
+font-family: 'Roboto Condensed', sans-serif;
+font-family: Verdana, sans-serif;
+font-family: Georgia, serif;
+*/
+
+/* Typography
+==================================================*/
+h1, h2, h3, h4, h5, h6 {font-family:'Roboto Condensed', sans-serif;}
+
+html {
+    font-size:16px;
+}
+
+body {
+    font-family: Georgia, serif;
+    font-size: 1rem;
+}
+
+h1 {
+    font-size: 4rem;
+}
+
+h2 {
+    font-size: 3rem;
+}
+
+/* Color Palette;
+==================================================*/
+
+/*
+Hex	    RGB
+#c7a46e	(199,164,110)
+#4c5e40	(76,94,64)
+#668b61	(102,139,97)
+#51382d	(81,56,45)
+#45270e	(69,39,14)
+*/
+
+/* General;
+==================================================*/
+
+body {
+  display: flex;
+  flex-direction: column;
+  background-color: #4c5e40;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Product Display
+==================================================*/
+
+#productDisplaySection {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  justify-content: space-evenly;
+  padding: 2rem 0 2rem 0;
+
+}
+
+#productDisplaySection img {
+  min-width: 250px;
+  max-width: 25%;
+  border: 0.25rem solid #c7a46e;
+  border-radius: .25rem;
+  transition: 0.5s;
+  margin: 1rem;
+}
+
+#productDisplaySection img:hover {
+  scale: 1.1;
+}
+
+/* Results Display
+==================================================*/
+
+#resultsSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1rem 0 1rem 0;
+  gap: 2rem;
+}
+
+#resultsButton {
+  background-color: #45270e;
+  border: 1px solid transparent;
+  border-radius: .25rem;
+  box-shadow: rgba(0, 0, 0, 0.02) 0 1px 3px 0;
+  color: #fff;
+  cursor: pointer;
+  font-family: Verdana, sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.25;
+  margin: 0.5rem;
+  padding: 1rem;
+  text-decoration: none;
+  transition: all 250ms;
+  user-select: none;
+  min-width: fit-content;
+  max-width: 25%;
+}
+
+#resultsButton:hover {
+  background-color: #51382d;
+  box-shadow: rgba(0, 0, 0, 0.1) 0 4px 12px;
+} 
+
+#resultsDisplay {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: 2rem;
+}
+
+#resultsChart:empty {
+  display: none;
+}
+
+#resultsChart {
+  border: 0.25rem solid #c7a46e;
+  background-color: #fff;
+  min-width: 600px;
+  min-height: 375px;
+  max-width: 80%;
+}
+
+#resultsList:empty {
+  display: none;
+}
+
+#resultsList {
+  border: 0.25rem solid #c7a46e;
+  background-color: #45270e;
+  direction: flex;
+  flex-direction: column;
+  width:  fit-content;
+  border-radius: .25rem;
+  padding: 1%;
+  white-space: nowrap;
+}
+
+#resultsList li {
+  color: #fff;
+  list-style: square inside;
+  padding: 1%;
+}
+
+@media (min-width: 1200px) {
+  #resultsDisplay {
+    flex-direction: row;
+    justify-content: center;
+    gap: 2rem;
+  }
+
+  #resultsChart {
+    border: 0.25rem solid #c7a46e;
+    background-color: #fff;
+    max-width: 800px;
+  }
+}

@@ -15,46 +15,26 @@ function Product(name, src) {
 }
 
 // Create Products for all included images
-const bag = new Product('bag', '/img/bag.jpg');
-const banana = new Product('banana', '/img/banana.jpg');
-const bathroom = new Product('bathroom', '/img/bathroom.jpg');
-const boots = new Product('boots', '/img/boots.jpg');
-const breakfast = new Product('breakfast', '/img/breakfast.jpg');
-const bubblegum = new Product('bubblegum', '/img/bubblegum.jpg');
-const chair = new Product('chair', '/img/chair.jpg');
-const cthulhu = new Product('cthulhu', '/img/cthulhu.jpg');
-const dogDuck = new Product('dog-duck', '/img/dog-duck.jpg');
-const dragon = new Product('dragon', '/img/dragon.jpg');
-const pen = new Product('pen', '/img/pen.jpg');
-const petSweep = new Product('pet-sweep', '/img/pet-sweep.jpg');
-const scissors = new Product('scissors', '/img/scissors.jpg');
-const shark = new Product('shark', '/img/shark.jpg');
-const sweep = new Product('sweep', '/img/sweep.png');
-const tauntaun = new Product('tauntaun', '/img/tauntaun.jpg');
-const unicorn = new Product('unicorn', '/img/unicorn.jpg');
-const waterCan = new Product('water-can', '/img/water-can.jpg');
-const wineGlass = new Product('wine-glass', '/img/wine-glass.jpg');
-
 const productsArray = [
-  bag,
-  banana,
-  bathroom,
-  boots,
-  breakfast,
-  bubblegum,
-  chair,
-  cthulhu,
-  dogDuck,
-  dragon,
-  pen,
-  petSweep,
-  scissors,
-  shark,
-  sweep,
-  tauntaun,
-  unicorn,
-  waterCan,
-  wineGlass
+  new Product('bag', '/img/bag.jpg'),
+  new Product('banana', '/img/banana.jpg'),
+  new Product('bathroom', '/img/bathroom.jpg'),
+  new Product('boots', '/img/boots.jpg'),
+  new Product('breakfast', '/img/breakfast.jpg'),
+  new Product('bubblegum', '/img/bubblegum.jpg'),
+  new Product('chair', '/img/chair.jpg'),
+  new Product('cthulhu', '/img/cthulhu.jpg'),
+  new Product('dog-duck', '/img/dog-duck.jpg'),
+  new Product('dragon', '/img/dragon.jpg'),
+  new Product('pen', '/img/pen.jpg'),
+  new Product('pet-sweep', '/img/pet-sweep.jpg'),
+  new Product('scissors', '/img/scissors.jpg'),
+  new Product('shark', '/img/shark.jpg'),
+  new Product('sweep', '/img/sweep.png'),
+  new Product('tauntaun', '/img/tauntaun.jpg'),
+  new Product('unicorn', '/img/unicorn.jpg'),
+  new Product('water-can', '/img/water-can.jpg'),
+  new Product('wine-glass', '/img/wine-glass.jpg')
 ];
 
 const resultsButton = document.getElementById('resultsButton');
@@ -79,7 +59,7 @@ let currentProductArrayIndices = {};
 // This function creates image elements to be populated with products
 function createInitialProducts() {
   // Define container where images are rendered, as well as fragment to append.
-  const container = document.getElementById('productDisplay');
+  const container = document.getElementById('productDisplaySection');
   const fragment = document.createDocumentFragment();
   for (let i = 0; i < NUM_OF_PRODUCTS; i++) {
     let imgElement = document.createElement('img');
@@ -136,6 +116,49 @@ function updateImageElement(imgElement, product) {
   imgElement.title = product.name;
 }
 
+// This function creates a chart for results viewing
+function createResultsChart() {
+  Chart.defaults.font.family = '"Georgia, serif"';
+  Chart.defaults.font.size = '16';
+  Chart.defaults.color = '#000';
+  const ctx = document.getElementById('resultsChart');
+  const resultsChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: productsArray.map(row => row.name), // x-axis
+      datasets: [{
+        label: 'Number of Clicks', // title
+        data: productsArray.map(row => row.clicks), // y-axis data
+        backgroundColor: [
+          'rgba(69,39,14)'
+        ],
+        borderColor: [
+          'rgba(199,164,110)',
+        ],
+        borderWidth: 2
+      },
+      {
+        label: 'Number of Views', // title
+        data: productsArray.map(row => row.views), // y-axis data
+        backgroundColor: [
+          'rgba(102,139,97)'
+        ],
+        borderColor: [
+          'rgba(199,164,110)',
+        ],
+        borderWidth: 2
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+
 // Event handler for clicking on an image
 function handleProductClick(event) {
   round++;
@@ -143,6 +166,8 @@ function handleProductClick(event) {
   productsArray[targetIndex].clicks++;
 
   if (round === TOTAL_ROUNDS) {
+    // When total rounds have passed, visually style the view results button to indicate a change of state
+    document.getElementById('resultsButton').style.border = '0.25rem solid #c7a46e';
     for (let img of document.getElementsByClassName('productImage')) {
       img.removeEventListener('click', handleProductClick);
     }
@@ -154,7 +179,9 @@ function handleProductClick(event) {
 
 // Event handler for clicking the results button
 function viewResults() {
-  let ul = document.getElementById('resultsList');
+  // The function will replace the current li elements with the set created in the fragment
+  const ul = document.getElementById('resultsList');
+  const fragment = document.createDocumentFragment();
   // make one li for each product
   for (let i = 0; i < productsArray.length; i++) {
     let li = document.createElement('li');
@@ -164,14 +191,19 @@ function viewResults() {
     let viewTimes = viewNumber === 1 ? 'time' : 'times';
     let clickTimes = clickNumber === 1 ? 'time' : 'times';
     li.innerText = `${productsArray[i].name} was viewed ${viewNumber} ${viewTimes}, and was clicked ${clickNumber} ${clickTimes}.`;
-    ul.appendChild(li);
+    fragment.appendChild(li);
   }
+  ul.replaceChildren(fragment);
 
   // Allow the user to view results after each click until total rounds have passed
   if (round === TOTAL_ROUNDS) {
+    // Only show the results chart after all rounds
+    createResultsChart();
     resultsButton.removeEventListener('click', viewResults);
   }
 }
+
+
 
 // On page load
 defineProductIndices();
