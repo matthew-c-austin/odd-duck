@@ -15,35 +15,90 @@ function Product(name, src) {
 }
 
 // Create Products for all included images
-const productsArray = [
-  new Product('bag', './img/bag.jpg'),
-  new Product('banana', './img/banana.jpg'),
-  new Product('bathroom', './img/bathroom.jpg'),
-  new Product('boots', './img/boots.jpg'),
-  new Product('breakfast', './img/breakfast.jpg'),
-  new Product('bubblegum', './img/bubblegum.jpg'),
-  new Product('chair', './img/chair.jpg'),
-  new Product('cthulhu', './img/cthulhu.jpg'),
-  new Product('dog-duck', './img/dog-duck.jpg'),
-  new Product('dragon', './img/dragon.jpg'),
-  new Product('pen', './img/pen.jpg'),
-  new Product('pet-sweep', './img/pet-sweep.jpg'),
-  new Product('scissors', './img/scissors.jpg'),
-  new Product('shark', './img/shark.jpg'),
-  new Product('sweep', './img/sweep.png'),
-  new Product('tauntaun', './img/tauntaun.jpg'),
-  new Product('unicorn', './img/unicorn.jpg'),
-  new Product('water-can', './img/water-can.jpg'),
-  new Product('wine-glass', './img/wine-glass.jpg')
-];
+let productsArray = [];
+
+// Define keys for caching the products array, round value, and products to be displayed on refresh
+const roundKey = 'current-round';
+const productsArrayKey = 'products-array';
+const currentProductArrayIndicesKey = 'current-product-indices';
 
 const resultsButton = document.getElementById('resultsButton');
+const resetButton = document.getElementById('resetButton');
 
 // Note: when a number of products on the page is greater or equal to half the total number of products, the requirement to have no repeats between clicks can't be met. This is handled by the boolean below
 const REPEAT_TRACK = productsArray.length / 2 >= NUM_OF_PRODUCTS ? true : false;
 
 // For incrementing clicks, define a global hash table that contains the indices for each product within the products array
 const productArrayIndices = {};
+
+// To ensure that there is no repeat products from the previous render, define a global hash table that is continuously updated as the renderProducts function is called
+let currentProductArrayIndices = {};
+
+// This function handles setting the current state on page load.
+function pageLoad() {
+  // Get all locally stored variables, or initialize them
+  loadVariables();
+  createInitialProducts();
+  // If the round is less than the total number of rounds, add event listeners for clicking and viewResults. Otherwise, style the results button
+  if (round < TOTAL_ROUNDS) {
+    for (let img of document.getElementsByClassName('productImage')) {
+      img.addEventListener('click', handleProductClick);
+    }
+  } else {
+    // When total rounds have passed, visually style the view results button to indicate a change of state
+    document.getElementById('resultsButton').style.border = '0.25rem solid #c7a46e';
+  }
+
+  resultsButton.addEventListener('click', viewResults);
+  resetButton.addEventListener('click', resetSurvey);
+
+  function loadVariables() {
+    defineProducts();
+    defineRound();
+    defineProductIndices();
+    defineCurrentProductArrayIndices();
+  }
+}
+
+// This function checks if the products array exists in local storage, and initializes then sets it if not
+function defineProducts() {
+  if (getLocalStorage(productsArrayKey)) {
+    productsArray = getLocalStorage(productsArrayKey);
+  } else {
+    productsArray = [
+      new Product('bag', './img/bag.jpg'),
+      new Product('banana', './img/banana.jpg'),
+      new Product('bathroom', './img/bathroom.jpg'),
+      new Product('boots', './img/boots.jpg'),
+      new Product('breakfast', './img/breakfast.jpg'),
+      new Product('bubblegum', './img/bubblegum.jpg'),
+      new Product('chair', './img/chair.jpg'),
+      new Product('cthulhu', './img/cthulhu.jpg'),
+      new Product('dog-duck', './img/dog-duck.jpg'),
+      new Product('dragon', './img/dragon.jpg'),
+      new Product('pen', './img/pen.jpg'),
+      new Product('pet-sweep', './img/pet-sweep.jpg'),
+      new Product('scissors', './img/scissors.jpg'),
+      new Product('shark', './img/shark.jpg'),
+      new Product('sweep', './img/sweep.png'),
+      new Product('tauntaun', './img/tauntaun.jpg'),
+      new Product('unicorn', './img/unicorn.jpg'),
+      new Product('water-can', './img/water-can.jpg'),
+      new Product('wine-glass', './img/wine-glass.jpg')
+    ];
+    setLocalStorage(productsArrayKey, productsArray);
+  }
+}
+
+// This function checks if the round variable exists in local storage, and sets it if not
+function defineRound() {
+  if (getLocalStorage(roundKey)) {
+    round = getLocalStorage(roundKey);
+  } else {
+    round = 0;
+    setLocalStorage(roundKey, round);
+  }
+}
 
 // This function creates an index map of the products
 function defineProductIndices() {
@@ -53,8 +108,25 @@ function defineProductIndices() {
   }
 }
 
-// To ensure that there is no repeat products from the previous render, define a global hash table that is continuously updated as the renderProducts function is called
-let currentProductArrayIndices = {};
+// This function checks if the current product array indices variable exists in local storage, and sets it if not
+function defineCurrentProductArrayIndices() {
+  if (getLocalStorage(currentProductArrayIndicesKey)) {
+    currentProductArrayIndices = getLocalStorage(currentProductArrayIndicesKey);
+  } else {
+    currentProductArrayIndices = {};
+    setLocalStorage(currentProductArrayIndicesKey, currentProductArrayIndices);
+  }
+}
+
+// Get local storage
+function getLocalStorage(key) {
+  return JSON.parse(localStorage.getItem(key));
+}
+
+// Set local storage
+function setLocalStorage(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
 
 // This function creates image elements to be populated with products
 function createInitialProducts() {
@@ -67,11 +139,17 @@ function createInitialProducts() {
     fragment.appendChild(imgElement);
   }
   container.appendChild(fragment);
-  renderProducts();
-  // Add event listeners for each product image
-  for (let img of document.getElementsByClassName('productImage')) {
-    img.addEventListener('click', handleProductClick);
+  // If there are no current products to be displayed from a previous load, i.e., the currentProductArrayIndices variable is empty, then create initial products to display, otherwise render the products from the previous page load.
+  if (isEmpty(currentProductArrayIndices)) {
+    renderProducts();
+  } else {
+    setCurrentProducts();
   }
+}
+
+// This function checks if an object is empty
+function isEmpty(obj) {
+  return Object.keys(obj).length === 0;
 }
 
 // This function renders random images on the page
@@ -101,6 +179,7 @@ function renderProducts() {
     newProductArrayIndices[index] = true;
   }
   currentProductArrayIndices = newProductArrayIndices;
+  setLocalStorage(currentProductArrayIndicesKey, currentProductArrayIndices);
 }
 
 // This function gets a random index from the products array
@@ -114,6 +193,19 @@ function updateImageElement(imgElement, product) {
   imgElement.src = product.src;
   imgElement.alt = product.name;
   imgElement.title = product.name;
+}
+
+// This function renders images from a previous page load
+function setCurrentProducts() {
+  const imgArray = document.getElementsByClassName('productImage');
+  // Since we use hash maps for storing current indices used, we use a for...in to iterate through each while also incrementing an iterator for the imgArray index
+  let i = 0;
+  for (let productsIdx in currentProductArrayIndices) {
+    let newProduct = productsArray[productsIdx];
+    updateImageElement(imgArray[i], newProduct);
+    // Note that views are not incremented, as they were viewed already on previous page load
+    i++;
+  }
 }
 
 // This function creates a chart for results viewing
@@ -165,6 +257,10 @@ function handleProductClick(event) {
   let targetIndex = productArrayIndices[event.target.id];
   productsArray[targetIndex].clicks++;
 
+  // Update local storage of products array and round variables
+  setLocalStorage(productsArrayKey, productsArray);
+  setLocalStorage(roundKey, round);
+
   if (round === TOTAL_ROUNDS) {
     // When total rounds have passed, visually style the view results button to indicate a change of state
     document.getElementById('resultsButton').style.border = '0.25rem solid #c7a46e';
@@ -203,9 +299,33 @@ function viewResults() {
   }
 }
 
+// Event handler for resetting the survey process
+function resetSurvey() {
+  localStorage.clear(productsArrayKey);
+  localStorage.clear(roundKey);
+  localStorage.clear(currentProductArrayIndicesKey);
+  // Use canvas.js getChart method to see if the chart has been rendered in the resultsChart canvas and destroy it
+  let chartStatus = Chart.getChart('resultsChart');
+  if (chartStatus !== undefined) {
+    chartStatus.destroy();
+  }
+  // Remove all list elements in the results if they exist
+  const resultsList = document.getElementById('resultsList');
+  removeAllChildNodes(resultsList);
+  // Remove all product images
+  const productDisplaySection = document.getElementById('productDisplaySection');
+  removeAllChildNodes(productDisplaySection);
+  // Remove results button styling
+  document.getElementById('resultsButton').style.border = '';
+  resetButton.removeEventListener('click', resetSurvey);
+  // Call the page load function again
+  pageLoad();
+  function removeAllChildNodes(parent) {
+    while (parent.firstChild) {
+      parent.removeChild(parent.firstChild);
+    }
+  }
+}
 
-
-// On page load
-defineProductIndices();
-createInitialProducts();
-resultsButton.addEventListener('click', viewResults);
+// Load page with saved settings
+pageLoad();

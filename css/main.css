@@ -103,7 +103,7 @@ main {
   gap: 2rem;
 }
 
-#resultsButton {
+button {
   background-color: #45270e;
   border: 1px solid transparent;
   border-radius: .25rem;
@@ -123,11 +123,14 @@ main {
   max-width: 25%;
 }
 
-#resultsButton:hover {
+button:hover {
   background-color: #51382d;
   box-shadow: rgba(0, 0, 0, 0.1) 0 4px 12px;
 } 
 
+#resetButton {
+  border: 0.25rem solid #c7a46e;
+}
 #resultsDisplay {
   display: flex;
   flex-wrap: wrap;
