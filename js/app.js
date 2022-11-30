@@ -6,7 +6,7 @@ const NUM_OF_PRODUCTS = 3;
 const TOTAL_ROUNDS = 25;
 let round = 0;
 
-// Constructor function to create a const  = new product
+// Constructor function to create a new product
 function Product(name, src) {
   this.name = name;
   this.src = src;
@@ -14,7 +14,7 @@ function Product(name, src) {
   this.views = 0;
 }
 
-// Create Products for all included images
+// Create products array for all included images
 let productsArray = [];
 
 // Define keys for caching the products array, round value, and products to be displayed on refresh
@@ -31,15 +31,18 @@ const REPEAT_TRACK = productsArray.length / 2 >= NUM_OF_PRODUCTS ? true : false;
 // For incrementing clicks, define a global hash table that contains the indices for each product within the products array
 const productArrayIndices = {};
 
-// To ensure that there is no repeat products from the previous render, define a global hash table that is continuously updated as the renderProducts function is called
-let currentProductArrayIndices = {};
+// To ensure that there is no repeat products from the previous render, define a global array that is continuously updated as the renderProducts function is called
+let currentProductArrayIndices = [];
 
 // This function handles setting the current state on page load.
 function pageLoad() {
-  // Get all locally stored variables, or initialize them
-  loadVariables();
+  // Get all locally stored variables or initialize them
+  defineProducts();
+  defineRound();
+  defineCurrentProductArrayIndices();
+  defineProductIndices();
   createInitialProducts();
-  // If the round is less than the total number of rounds, add event listeners for clicking and viewResults. Otherwise, style the results button
+  // If the round is less than the total number of rounds, add event listeners for clicking. Otherwise, style the results button
   if (round < TOTAL_ROUNDS) {
     for (let img of document.getElementsByClassName('productImage')) {
       img.addEventListener('click', handleProductClick);
@@ -48,19 +51,11 @@ function pageLoad() {
     // When total rounds have passed, visually style the view results button to indicate a change of state
     document.getElementById('resultsButton').style.border = '0.25rem solid #c7a46e';
   }
-
   resultsButton.addEventListener('click', viewResults);
   resetButton.addEventListener('click', resetSurvey);
-
-  function loadVariables() {
-    defineProducts();
-    defineRound();
-    defineProductIndices();
-    defineCurrentProductArrayIndices();
-  }
 }
 
-// This function checks if the products array exists in local storage, and initializes then sets it if not
+// This function checks if the products array exists in local storage, and sets it to an initial state if not
 function defineProducts() {
   if (getLocalStorage(productsArrayKey)) {
     productsArray = getLocalStorage(productsArrayKey);
@@ -90,7 +85,17 @@ function defineProducts() {
   }
 }
 
-// This function checks if the round variable exists in local storage, and sets it if not
+// Get local storage
+function getLocalStorage(key) {
+  return JSON.parse(localStorage.getItem(key));
+}
+
+// Set local storage
+function setLocalStorage(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+// This function checks if the round variable exists in local storage, and sets it to an initial state if not
 function defineRound() {
   if (getLocalStorage(roundKey)) {
     round = getLocalStorage(roundKey);
@@ -100,32 +105,22 @@ function defineRound() {
   }
 }
 
+// This function checks if the current product array indices variable exists in local storage, and sets it to an initial state if not
+function defineCurrentProductArrayIndices() {
+  if (getLocalStorage(currentProductArrayIndicesKey)) {
+    currentProductArrayIndices = getLocalStorage(currentProductArrayIndicesKey);
+  } else {
+    currentProductArrayIndices = [];
+    setLocalStorage(currentProductArrayIndicesKey, currentProductArrayIndices);
+  }
+}
+
 // This function creates an index map of the products
 function defineProductIndices() {
   for (let i = 0; i < productsArray.length; i++) {
     let productName = productsArray[i].name;
     productArrayIndices[productName] = i;
   }
-}
-
-// This function checks if the current product array indices variable exists in local storage, and sets it if not
-function defineCurrentProductArrayIndices() {
-  if (getLocalStorage(currentProductArrayIndicesKey)) {
-    currentProductArrayIndices = getLocalStorage(currentProductArrayIndicesKey);
-  } else {
-    currentProductArrayIndices = {};
-    setLocalStorage(currentProductArrayIndicesKey, currentProductArrayIndices);
-  }
-}
-
-// Get local storage
-function getLocalStorage(key) {
-  return JSON.parse(localStorage.getItem(key));
-}
-
-// Set local storage
-function setLocalStorage(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
 }
 
 // This function creates image elements to be populated with products
@@ -140,45 +135,41 @@ function createInitialProducts() {
   }
   container.appendChild(fragment);
   // If there are no current products to be displayed from a previous load, i.e., the currentProductArrayIndices variable is empty, then create initial products to display, otherwise render the products from the previous page load.
-  if (isEmpty(currentProductArrayIndices)) {
+  if (currentProductArrayIndices.length === 0) {
     renderProducts();
   } else {
     setCurrentProducts();
   }
 }
 
-// This function checks if an object is empty
-function isEmpty(obj) {
-  return Object.keys(obj).length === 0;
-}
-
 // This function renders random images on the page
 function renderProducts() {
-  // Define empty hash map for ensuring images rendered are not duplicates
-  let newProductArrayIndices = {};
-  for (let img of document.getElementsByClassName('productImage')) {
-    let index = getRandomIndex();
-
+  // Define empty array for ensuring images rendered are not duplicates
+  let newProductArrayIndices = [];
+  const imgArray = document.getElementsByClassName('productImage');
+  for (let i = 0; i < NUM_OF_PRODUCTS; i++) {
+    let randomIndex = getRandomIndex();
     // If the number of products to be displayed supports preventing repeats between clicks, check for repeats in the current render and in the new render
     if (REPEAT_TRACK) {
-      while (currentProductArrayIndices[index] || newProductArrayIndices[index]) {
-        index = getRandomIndex();
+      while (currentProductArrayIndices.includes(randomIndex) || newProductArrayIndices.includes(randomIndex)) {
+        randomIndex = getRandomIndex();
       }
     // If the number of products to be displayed doesn't support prevent repeats between clicks, only check for repeats within the new render
     } else {
-      while (newProductArrayIndices[index]) {
-        index = getRandomIndex();
+      while (newProductArrayIndices.includes(randomIndex)) {
+        randomIndex = getRandomIndex();
       }
     }
 
-    let newProduct = productsArray[index];
-    updateImageElement(img, newProduct);
+    let newProduct = productsArray[randomIndex];
+    updateImageElement(imgArray[i], newProduct);
     // Increment views
-    newProduct.views ++;
+    newProduct.views++;
     // Add index to the indices dictionary
-    newProductArrayIndices[index] = true;
+    newProductArrayIndices[i] = randomIndex;
   }
   currentProductArrayIndices = newProductArrayIndices;
+  // Keep track of the current products viewed in local storage
   setLocalStorage(currentProductArrayIndicesKey, currentProductArrayIndices);
 }
 
@@ -198,57 +189,12 @@ function updateImageElement(imgElement, product) {
 // This function renders images from a previous page load
 function setCurrentProducts() {
   const imgArray = document.getElementsByClassName('productImage');
-  // Since we use hash maps for storing current indices used, we use a for...in to iterate through each while also incrementing an iterator for the imgArray index
-  let i = 0;
-  for (let productsIdx in currentProductArrayIndices) {
+  for (let i = 0; i < NUM_OF_PRODUCTS; i++) {
+    let productsIdx = currentProductArrayIndices[i];
     let newProduct = productsArray[productsIdx];
     updateImageElement(imgArray[i], newProduct);
     // Note that views are not incremented, as they were viewed already on previous page load
-    i++;
   }
-}
-
-// This function creates a chart for results viewing
-function createResultsChart() {
-  Chart.defaults.font.family = '"Georgia, serif"';
-  Chart.defaults.font.size = '16';
-  Chart.defaults.color = '#000';
-  const ctx = document.getElementById('resultsChart');
-  const resultsChart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: productsArray.map(row => row.name), // x-axis
-      datasets: [{
-        label: 'Number of Clicks', // title
-        data: productsArray.map(row => row.clicks), // y-axis data
-        backgroundColor: [
-          'rgba(69,39,14)'
-        ],
-        borderColor: [
-          'rgba(199,164,110)',
-        ],
-        borderWidth: 2
-      },
-      {
-        label: 'Number of Views', // title
-        data: productsArray.map(row => row.views), // y-axis data
-        backgroundColor: [
-          'rgba(102,139,97)'
-        ],
-        borderColor: [
-          'rgba(199,164,110)',
-        ],
-        borderWidth: 2
-      }]
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true
-        }
-      }
-    }
-  });
 }
 
 // Event handler for clicking on an image
@@ -299,6 +245,49 @@ function viewResults() {
   }
 }
 
+// This function creates a chart for results viewing
+function createResultsChart() {
+  Chart.defaults.font.family = '"Georgia, serif"';
+  Chart.defaults.font.size = '16';
+  Chart.defaults.color = '#000';
+  const ctx = document.getElementById('resultsChart');
+  const resultsChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: productsArray.map(row => row.name), // x-axis
+      datasets: [{
+        label: 'Number of Clicks', // title
+        data: productsArray.map(row => row.clicks), // y-axis data
+        backgroundColor: [
+          'rgba(69,39,14)'
+        ],
+        borderColor: [
+          'rgba(199,164,110)',
+        ],
+        borderWidth: 2
+      },
+      {
+        label: 'Number of Views', // title
+        data: productsArray.map(row => row.views), // y-axis data
+        backgroundColor: [
+          'rgba(102,139,97)'
+        ],
+        borderColor: [
+          'rgba(199,164,110)',
+        ],
+        borderWidth: 2
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+}
+
 // Event handler for resetting the survey process
 function resetSurvey() {
   localStorage.clear(productsArrayKey);
@@ -320,10 +309,12 @@ function resetSurvey() {
   resetButton.removeEventListener('click', resetSurvey);
   // Call the page load function again
   pageLoad();
-  function removeAllChildNodes(parent) {
-    while (parent.firstChild) {
-      parent.removeChild(parent.firstChild);
-    }
+}
+
+// This function removes all child nodes from an element
+function removeAllChildNodes(parent) {
+  while (parent.firstChild) {
+    parent.removeChild(parent.firstChild);
   }
 }
 
