@@ -178,7 +178,7 @@ function getRandomIndex() {
   return Math.floor(Math.random() * productsArray.length);
 }
 
-// This function update an image element based off of a product object
+// This function updates an image element based off of a product object
 function updateImageElement(imgElement, product) {
   imgElement.id = product.name;
   imgElement.src = product.src;
@@ -290,15 +290,13 @@ function createResultsChart() {
 
 // Event handler for resetting the survey process
 function resetSurvey() {
-  localStorage.clear(productsArrayKey);
-  localStorage.clear(roundKey);
-  localStorage.clear(currentProductArrayIndicesKey);
-  // Use canvas.js getChart method to see if the chart has been rendered in the resultsChart canvas and destroy it
+  localStorage.clear();
+  // Use canvas.js getChart method to see if the chart has been rendered in the resultsChart canvas and, if so, destroy it
   let chartStatus = Chart.getChart('resultsChart');
   if (chartStatus !== undefined) {
     chartStatus.destroy();
   }
-  // Remove all list elements in the results if they exist
+  // Remove all list elements in the results if they have been displayed
   const resultsList = document.getElementById('resultsList');
   removeAllChildNodes(resultsList);
   // Remove all product images
@@ -306,6 +304,7 @@ function resetSurvey() {
   removeAllChildNodes(productDisplaySection);
   // Remove results button styling
   document.getElementById('resultsButton').style.border = '';
+  // Remove reset survey event listener because it is added again within the pageLoad function
   resetButton.removeEventListener('click', resetSurvey);
   // Call the page load function again
   pageLoad();
